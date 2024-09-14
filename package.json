@@ -1,0 +1,28 @@
+{
+  "name": "node_passport_login",
+  "version": "1.0.0",
+  "description": "nodejs typeScript api",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "yarn dev && node dist/index.js", 
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs.typeScript.api"
+  ],
+  "author": "KaioFernandes",
+  "license": "ISC",
+  "dependencies": {
+    "module-alias": "^2.2.3",
+    "yarn": "^1.22.22"
+  },
+  "devDependencies": {
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^22.5.5",
+    "typescript": "^5.6.2"
+  }
+}
