@@ -2,7 +2,6 @@ import './util/module-alias';
 import { Controller, Server } from '@overnightjs/core';
 import { Application } from 'express';
 import bodyParser from 'body-parser';
-import { runInThisContext } from 'vm';
 import { ForeCastController } from './controllers/forecast';
 
 
