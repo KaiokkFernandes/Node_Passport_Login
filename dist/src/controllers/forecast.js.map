@@ -1,0 +1,1 @@
+{"version":3,"file":"forecast.js","sourceRoot":"","sources":["../../../src/controllers/forecast.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,4CAAoD;AAG7C,IAAM,kBAAkB,GAAxB,MAAM,kBAAkB;IAErB,wBAAwB,CAAC,CAAS,EAAE,GAAa;IAExD,CAAC;CACH,CAAA;AALY,gDAAkB;AAErB;IADL,IAAA,UAAG,EAAC,EAAE,CAAC;;;;kEAGR;6BAJS,kBAAkB;IAD9B,IAAA,iBAAU,EAAC,UAAU,CAAC;GACV,kBAAkB,CAK9B"}
