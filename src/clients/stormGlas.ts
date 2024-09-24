@@ -1,3 +1,4 @@
+import { InternalError } from '@src/utils/errors/internal-error';
 import axios, { AxiosStatic } from 'axios';
 
 export interface StormGlassPointSource {
@@ -31,8 +32,17 @@ export interface ForecastPoint {
 }
 
 // A ideia dessas classes de erro e que é pra uma ppara entes de se comunicar com o serviço e a outra é quando serviço retorna um erro 
-export class ClientRequestError{
-  constructor(public message: string) {}  
+export class ClientRequestError extends InternalError{
+  constructor(message: string){
+    const internalMessage = 'Unexpected error when trying to communicate to StormGlass';
+    super(`${internalMessage}: ${message}`);  
+  } 
+}
+export class ClientResponseError extends InternalError {
+  constructor(message: string) {
+    const internalMessage = 'Unexpected error returned by the StormGlass service';  
+    super(`${internalMessage}: ${message}`);
+  } 
 }
 
 export class StormGlass {
@@ -53,12 +63,13 @@ export class StormGlass {
       }
     );
     return this.normalizeResponse(response.data);
-  } catch (err:any) {
-       throw new Error(`Unexpected error when trying to communicate to StormGlass: ${err.message}`);  
+  } catch(err:any) {
+    if(err.response && err.response.status){
+      throw new ClientResponseError(`Error: ${JSON.stringify(err.response.data)} Code: ${err.response.status}`); 
+    }
+      throw new ClientRequestError(err.message); 
   }
-  }
-
-  
+  }  
   private normalizeResponse(
     points: StormGlassForecastResponse
   ): ForecastPoint[] {
