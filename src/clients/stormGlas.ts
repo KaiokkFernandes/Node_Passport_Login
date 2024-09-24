@@ -30,6 +30,11 @@ export interface ForecastPoint {
   windSpeed: number;
 }
 
+// A ideia dessas classes de erro e que é pra uma ppara entes de se comunicar com o serviço e a outra é quando serviço retorna um erro 
+export class ClientRequestError{
+  constructor(public message: string) {}  
+}
+
 export class StormGlass {
   readonly stormGlassAPIParams =
     'swellDirection,swellHeight,swellPeriod,waveDirection,waveHeight,windDirection,windSpeed';
@@ -38,6 +43,7 @@ export class StormGlass {
   constructor(protected request: AxiosStatic = axios) {}
 
   public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
+   try{
     const response = await this.request.get<StormGlassForecastResponse>(
       `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
       {
@@ -47,7 +53,12 @@ export class StormGlass {
       }
     );
     return this.normalizeResponse(response.data);
+  } catch (err:any) {
+       throw new Error(`Unexpected error when trying to communicate to StormGlass: ${err.message}`);  
   }
+  }
+
+  
   private normalizeResponse(
     points: StormGlassForecastResponse
   ): ForecastPoint[] {
