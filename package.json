@@ -32,6 +32,7 @@
     "axios": "^1.7.7",
     "body-parse": "^0.1.0",
     "config": "^3.3.12",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "module-alias": "^2.2.3",
     "yarn": "^1.22.22"
