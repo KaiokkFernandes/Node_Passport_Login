@@ -1,6 +1,6 @@
 import { InternalError } from '@src/utils/errors/internal-error';
-import config, { IConfig } from 'config';
 import * as HTTPUtil from '@src/utils/Request';
+import 'dotenv/config'; // Configura o dotenv para carregar o arquivo .env
 
 export interface StormGlassPointSource {
   [key: string]: number;
@@ -32,21 +32,20 @@ export interface ForecastPoint {
   windSpeed: number;
 }
 
-// A ideia dessas classes de erro e que é pra uma ppara entes de se comunicar com o serviço e a outra é quando serviço retorna um erro 
-export class ClientRequestError extends InternalError{
-  constructor(message: string){
-    const internalMessage = 'Unexpected error when trying to communicate to StormGlass';
-    super(`${internalMessage}: ${message}`);  
-  } 
-}
-export class ClientResponseError extends InternalError {
+// A ideia dessas classes de erro é que uma é para erros antes de se comunicar com o serviço e a outra é quando o serviço retorna um erro 
+export class ClientRequestError extends InternalError {
   constructor(message: string) {
-    const internalMessage = 'Unexpected error returned by the StormGlass service';  
+    const internalMessage = 'Unexpected error when trying to communicate to StormGlass';
     super(`${internalMessage}: ${message}`);
-  } 
+  }
 }
 
-const stormGlassApiParams: IConfig = config.get('App.resources.stormGlass.StormGlass');  
+export class ClientResponseError extends InternalError {
+  constructor(message: string) {
+    const internalMessage = 'Unexpected error returned by the StormGlass service';
+    super(`${internalMessage}: ${message}`);
+  }
+}
 
 export class StormGlass {
   readonly stormGlassAPIParams =
@@ -56,26 +55,25 @@ export class StormGlass {
   constructor(protected request = new HTTPUtil.Request()) {}
 
   public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
-   try{
-    const response = await this.request.get<StormGlassForecastResponse>(
-      `${stormGlassApiParams.get(`apiUrl`)}/weather/point?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
-      {
-        headers: {
-         Authorization: stormGlassApiParams.get(`apiToken`),
-        },
+    try {
+      const response = await this.request.get<StormGlassForecastResponse>(
+        `${process.env.STORMGLASS_API_URL}/weather/point?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
+        {
+          headers: {
+            Authorization: process.env.STORMGLASS_API_TOKEN || '',
+          },
+        }
+      );
+      return this.normalizeResponse(response.data);
+    } catch (err: any) {
+      if (err.response && err.response.status) {
+        throw new ClientResponseError(`Error: ${JSON.stringify(err.response.data)} Code: ${err.response.status}`);
       }
-    );
-    return this.normalizeResponse(response.data);
-  } catch(err:any) {
-    if(err.response && err.response.status){
-      throw new ClientResponseError(`Error: ${JSON.stringify(err.response.data)} Code: ${err.response.status}`); 
+      throw new ClientRequestError(err.message);
     }
-      throw new ClientRequestError(err.message); 
   }
-  }  
-  private normalizeResponse(
-    points: StormGlassForecastResponse
-  ): ForecastPoint[] {
+
+  private normalizeResponse(points: StormGlassForecastResponse): ForecastPoint[] {
     return points.hours.filter(this.isValidPoint.bind(this)).map((point) => ({
       swellDirection: point.swellDirection[this.stormGlassAPISource],
       swellHeight: point.swellHeight[this.stormGlassAPISource],
